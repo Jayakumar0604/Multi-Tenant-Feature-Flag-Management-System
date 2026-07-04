@@ -9,6 +9,10 @@ const createOrganization = async (req, res, next) => {
 
     const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     
+    if (!slug) {
+      return res.status(400).json({ error: { code: 'INVALID_ORGANIZATION_NAME', message: 'Organization name must contain at least one alphanumeric character' } });
+    }
+    
     // Check if name or slug already exists
     const existingOrg = await Organization.findOne({ $or: [{ name: name.trim() }, { slug }] });
     if (existingOrg) {

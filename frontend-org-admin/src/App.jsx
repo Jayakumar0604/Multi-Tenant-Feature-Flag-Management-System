@@ -206,6 +206,8 @@ function App() {
         throw new Error(data.error?.message || 'Failed to toggle feature flag');
       }
     } catch (err) {
+      // Rollback
+      setFlags(prev => prev.map(f => f._id === flagId ? { ...f, enabled: currentStatus } : f));
       setError(err.message);
     }
   };

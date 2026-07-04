@@ -9,6 +9,15 @@ const errorHandler = (err, req, res, next) => {
       }
     });
   }
+  
+  if (err.name === 'CastError') {
+    return res.status(400).json({
+      error: {
+        code: 'INVALID_ID_FORMAT',
+        message: `Invalid resource ID format for path: ${err.path}`,
+      }
+    });
+  }
 
   if (err.code === 11000) {
     return res.status(400).json({
