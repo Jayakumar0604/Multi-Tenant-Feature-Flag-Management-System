@@ -12,13 +12,22 @@ const listPublicOrganizations = async (req, res, next) => {
 
 const checkFlag = async (req, res, next) => {
   try {
-    const { organizationId, key } = req.body;
-    if (!organizationId || !key) {
-      return res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'Organization ID and feature flag key are required' } });
+    const { organizationId, organizationSlug, key } = req.body;
+    if ((!organizationId && !organizationSlug) || !key) {
+      return res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'Organization ID/Slug and feature flag key are required' } });
+    }
+
+    let resolvedOrgId = organizationId;
+    if (!resolvedOrgId && organizationSlug) {
+      const org = await Organization.findOne({ slug: organizationSlug.trim().toLowerCase() });
+      if (!org) {
+        return res.status(404).json({ error: { code: 'ORGANIZATION_NOT_FOUND', message: `Organization with slug '${organizationSlug}' not found` } });
+      }
+      resolvedOrgId = org._id;
     }
 
     const flag = await FeatureFlag.findOne({
-      organizationId,
+      organizationId: resolvedOrgId,
       key,
     });
 
